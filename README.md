@@ -2,38 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-
-  <title>Ciliary Muscle and Accommodation Simulation</title>
+  <title>How the Eye Focuses Light</title>
 
   <style>
     :root {
-      --page-bg: #eef5fb;
-      --panel-bg: #ffffff;
-      --text: #183047;
-      --muted: #5d7184;
-
-      --blue: #1887c9;
-      --blue-dark: #075985;
-      --light-blue: #d9f1ff;
-
-      --muscle: #ef476f;
-      --muscle-dark: #b42345;
-
-      --ligament: #7c3aed;
-      --lens: #f9d976;
-      --lens-edge: #a66d00;
-
-      --retina: #e76f51;
-      --ray: #f4b400;
-
-      --success: #198754;
-      --border: #d5e2ec;
-      --shadow: 0 12px 30px rgba(38, 74, 100, 0.12);
+      --navy: #17324d;
+      --blue: #2f80ed;
+      --blue-dark: #1766c2;
+      --cyan: #55d6e9;
+      --yellow: #ffd166;
+      --green: #35b779;
+      --red: #ef476f;
+      --orange: #f8961e;
+      --purple: #8a5cf6;
+      --cream: #fffaf1;
+      --panel: rgba(255, 255, 255, 0.94);
+      --border: #dce8f2;
+      --muted: #60758a;
+      --shadow: 0 18px 45px rgba(26, 64, 96, 0.13);
     }
 
     * {
@@ -43,13 +31,12 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family:
-        Inter, system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", sans-serif;
-      color: var(--text);
+      font-family: Inter, ui-rounded, "Segoe UI", Arial, sans-serif;
+      color: var(--navy);
       background:
-        radial-gradient(circle at top left, #ffffff 0, transparent 35%),
-        var(--page-bg);
+        radial-gradient(circle at 15% 10%, #dff9ff 0, transparent 30%),
+        radial-gradient(circle at 90% 20%, #ece5ff 0, transparent 34%),
+        linear-gradient(135deg, #f8fcff, #fffaf0);
     }
 
     button,
@@ -58,545 +45,554 @@
     }
 
     .page {
-      width: min(1180px, calc(100% - 32px));
+      width: min(1200px, calc(100% - 28px));
       margin: 0 auto;
-      padding: 32px 0 50px;
+      padding: 28px 0 44px;
     }
 
-    .hero {
+    header {
       margin-bottom: 22px;
       text-align: center;
     }
 
     .eyebrow {
-      margin: 0 0 8px;
-      color: var(--blue-dark);
+      display: inline-block;
+      padding: 7px 13px;
+      margin-bottom: 10px;
+      border: 1px solid #cce8f1;
+      border-radius: 999px;
+      color: #16718b;
+      background: rgba(255, 255, 255, 0.75);
       font-size: 0.82rem;
       font-weight: 800;
-      letter-spacing: 0.11em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(1.9rem, 4vw, 3.1rem);
-      line-height: 1.08;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
     }
 
     .subtitle {
-      max-width: 760px;
+      max-width: 770px;
       margin: 12px auto 0;
       color: var(--muted);
-      font-size: 1.04rem;
+      font-size: clamp(1rem, 2vw, 1.14rem);
       line-height: 1.6;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 325px;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .card {
+      border: 1px solid rgba(200, 220, 235, 0.85);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
     }
 
     .simulation-card {
       overflow: hidden;
-      background: var(--panel-bg);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
     }
 
-    .simulation-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(90deg, #f7fcff, #ffffff);
-    }
-
-    .simulation-heading h2 {
-      margin: 0;
-      font-size: 1.25rem;
-    }
-
-    .mode-badge {
-      min-width: 160px;
-      padding: 10px 16px;
-      color: white;
-      background: var(--blue-dark);
-      border-radius: 999px;
-      font-size: 0.9rem;
-      font-weight: 800;
-      text-align: center;
-      transition:
-        background-color 250ms ease,
-        transform 250ms ease;
-    }
-
-    .visual-wrapper {
-      position: relative;
-      padding: 12px;
-      background:
-        linear-gradient(#ffffffdd, #ffffffdd),
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 24px,
-          #e8f2f8 25px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 24px,
-          #e8f2f8 25px
-        );
-    }
-
-    #eyeDiagram {
-      display: block;
-      width: 100%;
-      min-height: 430px;
-    }
-
-    .eye-outline {
-      fill: #f8fdff;
-      stroke: #7ba8c4;
-      stroke-width: 5;
-    }
-
-    .cornea {
-      fill: #d8f5ff;
-      fill-opacity: 0.8;
-      stroke: var(--blue);
-      stroke-width: 5;
-    }
-
-    .iris {
-      stroke: #1d7c58;
-      stroke-width: 15;
-      stroke-linecap: round;
-    }
-
-    .pupil {
-      fill: #15202b;
-    }
-
-    .retina {
-      fill: none;
-      stroke: var(--retina);
-      stroke-width: 13;
-      stroke-linecap: round;
-    }
-
-    .optic-nerve {
-      fill: none;
-      stroke: #e8a17f;
-      stroke-width: 30;
-      stroke-linecap: round;
-    }
-
-    .lens {
-      fill: url(#lensGradient);
-      stroke: var(--lens-edge);
-      stroke-width: 4;
-      filter: drop-shadow(0 5px 5px rgba(139, 93, 12, 0.22));
-      transition: d 300ms ease;
-    }
-
-    .muscle {
-      fill: var(--muscle);
-      stroke: var(--muscle-dark);
-      stroke-width: 4;
-      transition:
-        transform 300ms ease,
-        opacity 300ms ease;
-    }
-
-    .ligament {
-      fill: none;
-      stroke: var(--ligament);
-      stroke-width: 3.5;
-      stroke-linecap: round;
-      transition: d 300ms ease;
-    }
-
-    .light-ray {
-      fill: none;
-      stroke: var(--ray);
-      stroke-width: 4;
-      stroke-linecap: round;
-      filter: drop-shadow(0 1px 2px rgba(110, 75, 0, 0.2));
-    }
-
-    .central-ray {
-      stroke-dasharray: 10 8;
-      opacity: 0.72;
-    }
-
-    .focus-dot {
-      fill: #ffcc00;
-      stroke: #a66d00;
-      stroke-width: 3;
-    }
-
-    .label {
-      fill: var(--text);
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .small-label {
-      fill: var(--muted);
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .object-arrow {
-      fill: var(--blue);
-      stroke: var(--blue-dark);
-      stroke-width: 3;
-    }
-
-    .object-ground {
-      stroke: var(--blue-dark);
-      stroke-width: 5;
-      stroke-linecap: round;
-    }
-
-    .control-panel {
-      display: grid;
-      grid-template-columns: minmax(280px, 1.3fr) minmax(280px, 0.7fr);
-      gap: 24px;
-      padding: 24px;
-      border-top: 1px solid var(--border);
-    }
-
-    .slider-area {
-      padding: 20px;
-      background: #f7fbfe;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-    }
-
-    .slider-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .slider-heading h3 {
-      margin: 0;
-      font-size: 1rem;
-    }
-
-    .slider-value {
-      color: var(--blue-dark);
-      font-weight: 900;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      height: 9px;
-      appearance: none;
-      border-radius: 999px;
-      outline: none;
-      background:
-        linear-gradient(
-          to right,
-          var(--blue) 0%,
-          var(--blue) 50%,
-          #cbd9e3 50%,
-          #cbd9e3 100%
-        );
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      width: 25px;
-      height: 25px;
-      appearance: none;
-      cursor: grab;
-      background: white;
-      border: 7px solid var(--blue-dark);
-      border-radius: 50%;
-      box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 13px;
-      height: 13px;
-      cursor: grab;
-      background: white;
-      border: 7px solid var(--blue-dark);
-      border-radius: 50%;
-      box-shadow: 0 3px 9px rgba(0, 0, 0, 0.2);
-    }
-
-    .range-labels {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 0.84rem;
-      font-weight: 800;
-    }
-
-    .preset-buttons {
+    .control-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, #f8fdff, #fffcf5);
     }
 
-    .preset-button {
-      padding: 10px 15px;
-      cursor: pointer;
-      color: var(--blue-dark);
-      background: white;
-      border: 2px solid var(--blue);
-      border-radius: 10px;
-      font-weight: 800;
-      transition:
-        color 180ms ease,
-        background-color 180ms ease,
-        transform 180ms ease;
-    }
-
-    .preset-button:hover,
-    .preset-button:focus-visible {
-      color: white;
-      background: var(--blue);
-      transform: translateY(-2px);
-    }
-
-    .preset-button.active {
-      color: white;
-      background: var(--blue-dark);
-      border-color: var(--blue-dark);
-    }
-
-    .status-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .status-item {
-      min-height: 92px;
-      padding: 14px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-    }
-
-    .status-name {
+    .control-label {
       display: block;
-      margin-bottom: 7px;
+      margin-bottom: 8px;
       color: var(--muted);
-      font-size: 0.75rem;
-      font-weight: 900;
+      font-size: 0.78rem;
+      font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
-    .status-value {
-      display: block;
-      color: var(--text);
-      font-size: 0.96rem;
-      font-weight: 900;
-      line-height: 1.3;
-    }
-
-    .explanation {
-      padding: 20px;
-      background: #fffaf0;
-      border: 1px solid #f2dc9b;
-      border-radius: 18px;
-    }
-
-    .explanation h3 {
-      margin: 0 0 10px;
-      color: #805b00;
-    }
-
-    .explanation p {
-      margin: 0;
-      line-height: 1.6;
-    }
-
-    .important-note {
-      margin-top: 14px !important;
-      padding: 12px;
-      color: #6a2459;
-      background: #fff2fb;
-      border-left: 5px solid var(--muscle);
-      border-radius: 8px;
-      font-size: 0.92rem;
-    }
-
-    .story-section {
-      margin-top: 24px;
-      padding: 24px;
-      background: var(--panel-bg);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-    }
-
-    .story-section h2 {
-      margin: 0 0 18px;
-      text-align: center;
-    }
-
-    .story-flow {
-      display: grid;
-      grid-template-columns:
-        minmax(145px, 1fr) 44px
-        minmax(145px, 1fr) 44px
-        minmax(145px, 1fr) 44px
-        minmax(145px, 1fr);
-      align-items: stretch;
+    .choice-buttons {
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
     }
 
-    .story-step {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 135px;
-      padding: 16px;
-      text-align: center;
-      background: #f7fbfe;
-      border: 2px solid var(--border);
-      border-radius: 16px;
+    .choice-button,
+    .action-button {
+      border: 0;
+      border-radius: 13px;
+      cursor: pointer;
+      font-weight: 800;
       transition:
-        border-color 250ms ease,
-        background-color 250ms ease,
-        transform 250ms ease;
+        transform 160ms ease,
+        box-shadow 160ms ease,
+        background 160ms ease;
     }
 
-    .story-step.active {
-      background: #ebf8ff;
-      border-color: var(--blue);
-      transform: translateY(-3px);
+    .choice-button {
+      padding: 10px 14px;
+      color: var(--navy);
+      background: #edf4f9;
     }
 
-    .step-number {
-      display: grid;
-      width: 30px;
-      height: 30px;
-      margin: 0 auto 9px;
-      place-items: center;
+    .choice-button:hover,
+    .action-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .choice-button:focus-visible,
+    .action-button:focus-visible,
+    input:focus-visible + .switch-track,
+    input[type="range"]:focus-visible {
+      outline: 3px solid rgba(47, 128, 237, 0.35);
+      outline-offset: 3px;
+    }
+
+    .choice-button.active {
       color: white;
-      background: var(--blue-dark);
-      border-radius: 50%;
-      font-size: 0.84rem;
-      font-weight: 900;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      box-shadow: 0 7px 18px rgba(47, 128, 237, 0.25);
     }
 
-    .story-step strong {
-      margin-bottom: 5px;
-    }
-
-    .story-step span:last-child {
-      color: var(--muted);
-      font-size: 0.88rem;
-      line-height: 1.4;
-    }
-
-    .story-arrow {
-      display: grid;
-      place-items: center;
-      color: var(--blue);
-      font-size: 2rem;
-      font-weight: 900;
-    }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px 22px;
-      margin-top: 20px;
-      color: var(--muted);
-      font-size: 0.86rem;
-      font-weight: 700;
-    }
-
-    .legend-item {
+    .switch-row {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 9px;
+      font-size: 0.92rem;
+      font-weight: 750;
     }
 
-    .legend-color {
-      width: 18px;
-      height: 7px;
+    .switch {
+      position: relative;
+      width: 48px;
+      height: 27px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      width: 0;
+      height: 0;
+      opacity: 0;
+    }
+
+    .switch-track {
+      position: absolute;
+      inset: 0;
       border-radius: 999px;
+      cursor: pointer;
+      background: #bdcad5;
+      transition: 180ms ease;
     }
 
-    .footer-note {
-      max-width: 850px;
-      margin: 20px auto 0;
+    .switch-track::after {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      content: "";
+      transition: 180ms ease;
+    }
+
+    .switch input:checked + .switch-track {
+      background: var(--blue);
+    }
+
+    .switch input:checked + .switch-track::after {
+      transform: translateX(21px);
+    }
+
+    .diagram-wrap {
+      position: relative;
+      padding: 8px 12px 0;
+      background:
+        linear-gradient(rgba(65, 137, 188, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(65, 137, 188, 0.04) 1px, transparent 1px);
+      background-size: 26px 26px;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 390px;
+      overflow: visible;
+    }
+
+    .ray {
+      fill: none;
+      stroke: var(--yellow);
+      stroke-width: 4;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 4px rgba(255, 193, 7, 0.75));
+    }
+
+    .ray-extension {
+      fill: none;
+      stroke: var(--orange);
+      stroke-width: 2.5;
+      stroke-dasharray: 7 7;
+      opacity: 0.75;
+    }
+
+    #raysGroup,
+    #outsideRays,
+    #extensionGroup {
+      transition: opacity 220ms ease;
+    }
+
+    .diagram-label {
+      fill: var(--navy);
+      font-size: 17px;
+      font-weight: 800;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    .small-label {
+      fill: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 3px;
+    }
+
+    .focus-label {
+      fill: var(--red);
+      font-size: 15px;
+      font-weight: 900;
+      paint-order: stroke;
+      stroke: white;
+      stroke-width: 4px;
+    }
+
+    #lensShape,
+    #lensHighlight,
+    #focusPoint,
+    #focusGlow {
+      transition: 180ms ease;
+    }
+
+    .slider-section {
+      padding: 18px 22px 22px;
+      border-top: 1px solid var(--border);
+      background: white;
+    }
+
+    .slider-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 12px;
+    }
+
+    .slider-heading h2 {
+      margin: 0;
+      font-size: 1.08rem;
+    }
+
+    .value-badge {
+      padding: 6px 11px;
+      border-radius: 999px;
+      color: #28556f;
+      background: #e8f8fc;
+      font-size: 0.86rem;
+      font-weight: 850;
+    }
+
+    .slider-container {
+      display: grid;
+      grid-template-columns: auto minmax(160px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .slider-end {
       color: var(--muted);
-      font-size: 0.84rem;
-      line-height: 1.5;
-      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 800;
     }
 
-    @media (max-width: 850px) {
-      .control-panel {
+    input[type="range"] {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      outline: none;
+      appearance: none;
+      background: linear-gradient(
+        to right,
+        #8edce8 0%,
+        var(--blue) var(--slider-progress, 50%),
+        #dbe5ec var(--slider-progress, 50%),
+        #dbe5ec 100%
+      );
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      width: 26px;
+      height: 26px;
+      border: 4px solid white;
+      border-radius: 50%;
+      appearance: none;
+      cursor: grab;
+      background: var(--blue);
+      box-shadow: 0 3px 10px rgba(30, 80, 130, 0.35);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 19px;
+      height: 19px;
+      border: 4px solid white;
+      border-radius: 50%;
+      cursor: grab;
+      background: var(--blue);
+      box-shadow: 0 3px 10px rgba(30, 80, 130, 0.35);
+    }
+
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .status-card,
+    .lesson-card,
+    .challenge-card {
+      padding: 20px;
+    }
+
+    .status-icon {
+      display: grid;
+      width: 52px;
+      height: 52px;
+      margin-bottom: 13px;
+      place-items: center;
+      border-radius: 17px;
+      background: #eef4ff;
+      font-size: 1.65rem;
+    }
+
+    .status-card h2,
+    .lesson-card h2,
+    .challenge-card h2 {
+      margin: 0 0 9px;
+      font-size: 1.13rem;
+    }
+
+    #statusTitle {
+      color: var(--orange);
+    }
+
+    #statusText,
+    #conceptText,
+    #challengeText {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.52;
+    }
+
+    .retina-meter {
+      position: relative;
+      height: 11px;
+      margin: 18px 0 9px;
+      border-radius: 999px;
+      background: linear-gradient(
+        to right,
+        #ffd6df 0 43%,
+        #a7eccb 43% 57%,
+        #ffd6df 57% 100%
+      );
+    }
+
+    .retina-meter::after {
+      position: absolute;
+      top: -5px;
+      left: 50%;
+      width: 3px;
+      height: 21px;
+      border-radius: 2px;
+      background: var(--green);
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    #meterMarker {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border: 3px solid white;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 3px 8px rgba(40, 70, 100, 0.3);
+      transform: translate(-50%, -50%);
+      transition:
+        left 180ms ease,
+        background 180ms ease;
+    }
+
+    .meter-labels {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    .key-idea {
+      margin-top: 15px;
+      padding: 14px;
+      border-left: 5px solid var(--purple);
+      border-radius: 12px;
+      background: #f5f1ff;
+      line-height: 1.45;
+    }
+
+    .key-idea strong {
+      color: #6035c4;
+    }
+
+    .action-button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px 14px;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      box-shadow: 0 8px 18px rgba(47, 128, 237, 0.2);
+    }
+
+    .action-button.secondary {
+      color: var(--navy);
+      background: #edf4f9;
+      box-shadow: none;
+    }
+
+    .success-flash {
+      animation: successPulse 700ms ease;
+    }
+
+    @keyframes successPulse {
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      45% {
+        transform: scale(1.035);
+        box-shadow: 0 18px 45px rgba(53, 183, 121, 0.28);
+      }
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .summary-card {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+    }
+
+    .summary-icon {
+      display: grid;
+      width: 62px;
+      height: 62px;
+      place-items: center;
+      border-radius: 19px;
+      font-size: 1.8rem;
+    }
+
+    .near-summary .summary-icon {
+      background: #fff0d5;
+    }
+
+    .far-summary .summary-icon {
+      background: #e7f4ff;
+    }
+
+    .summary-card h3 {
+      margin: 0 0 5px;
+      font-size: 1rem;
+    }
+
+    .summary-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
         grid-template-columns: 1fr;
       }
 
-      .story-flow {
-        grid-template-columns: 1fr;
+      .side-panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .story-arrow {
-        height: 34px;
-        transform: rotate(90deg);
-      }
-
-      #eyeDiagram {
-        min-height: 350px;
+      .challenge-card {
+        grid-column: 1 / -1;
       }
     }
 
-    @media (max-width: 560px) {
+    @media (max-width: 620px) {
       .page {
-        width: min(100% - 18px, 1180px);
-        padding-top: 20px;
+        width: min(100% - 16px, 1200px);
+        padding-top: 18px;
       }
 
-      .simulation-heading {
+      .control-bar {
         align-items: flex-start;
         flex-direction: column;
       }
 
-      .mode-badge {
-        min-width: 0;
-      }
-
-      .status-grid {
+      .side-panel,
+      .summary-grid {
         grid-template-columns: 1fr;
       }
 
-      .control-panel {
-        padding: 14px;
+      .challenge-card {
+        grid-column: auto;
       }
 
-      .visual-wrapper {
-        overflow-x: auto;
+      .slider-container {
+        grid-template-columns: 1fr;
       }
 
-      #eyeDiagram {
-        width: 850px;
+      .slider-end {
+        display: none;
       }
-    }
 
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
+      svg {
+        min-height: 300px;
       }
     }
   </style>
@@ -604,1203 +600,940 @@
 
 <body>
   <main class="page">
-    <header class="hero">
-      <p class="eyebrow">Interactive eye simulation</p>
+    <header>
+      <div class="eyebrow">Interactive Grade 8 Science</div>
 
-      <h1>How the Eye Focuses</h1>
+      <h1>How Does the Eye Focus Light?</h1>
 
       <p class="subtitle">
-        Move the slider to see how the ciliary muscles,
-        suspensory ligaments, and lens work together to focus
-        light from near and distant objects.
+        Choose a near or distant object. Then change the thickness of the
+        eye's lens until the light focuses exactly on the retina.
       </p>
     </header>
 
-    <section class="simulation-card">
-      <div class="simulation-heading">
-        <h2>Accommodation inside the eye</h2>
+    <section class="main-grid">
+      <article class="card simulation-card">
+        <div class="control-bar">
+          <div>
+            <span class="control-label">Choose an object</span>
 
-        <div
-          class="mode-badge"
-          id="modeBadge"
-          aria-live="polite"
-        >
-          Intermediate focus
+            <div
+              class="choice-buttons"
+              role="group"
+              aria-label="Object distance"
+            >
+              <button
+                id="nearButton"
+                class="choice-button"
+                type="button"
+                aria-pressed="false"
+              >
+                📖 Near object
+              </button>
+
+              <button
+                id="farButton"
+                class="choice-button active"
+                type="button"
+                aria-pressed="true"
+              >
+                🏔️ Distant object
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <span class="control-label">Diagram options</span>
+
+            <label class="switch-row">
+              <span class="switch">
+                <input id="rayToggle" type="checkbox" checked />
+                <span class="switch-track"></span>
+              </span>
+
+              Show light rays
+            </label>
+          </div>
         </div>
-      </div>
 
-      <div class="visual-wrapper">
-        <svg
-          id="eyeDiagram"
-          viewBox="0 0 1000 520"
-          role="img"
-          aria-labelledby="diagramTitle diagramDescription"
-        >
-          <title id="diagramTitle">
-            Eye accommodation simulation
-          </title>
+        <div class="diagram-wrap">
+          <svg
+            id="eyeDiagram"
+            viewBox="0 0 940 500"
+            role="img"
+            aria-labelledby="diagramTitle diagramDescription"
+          >
+            <title id="diagramTitle">
+              Simplified eye lens focusing simulation
+            </title>
 
-          <desc id="diagramDescription">
-            An interactive diagram showing how the ciliary
-            muscles alter ligament tension and lens shape to
-            focus light on the retina.
-          </desc>
+            <desc id="diagramDescription">
+              A circular eyeball contains an adjustable lens and a retina.
+              Light rays pass through the lens and meet at a focal point.
+            </desc>
 
-          <defs>
-            <linearGradient
-              id="lensGradient"
-              x1="0"
-              y1="0"
-              x2="1"
-              y2="1"
-            >
-              <stop offset="0%" stop-color="#fff8bd" />
-              <stop offset="55%" stop-color="#f9d976" />
-              <stop offset="100%" stop-color="#e8a920" />
-            </linearGradient>
+            <defs>
+              <radialGradient id="eyeballFill" cx="38%" cy="32%" r="75%">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="65%" stop-color="#edf9ff" />
+                <stop offset="100%" stop-color="#d8effb" />
+              </radialGradient>
 
-            <marker
-              id="rayArrow"
-              markerWidth="9"
-              markerHeight="9"
-              refX="7"
-              refY="3"
-              orient="auto"
-              markerUnits="strokeWidth"
-            >
+              <linearGradient id="lensFill" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#49bad7" stop-opacity="0.92" />
+                <stop offset="50%" stop-color="#d9fbff" stop-opacity="0.98" />
+                <stop offset="100%" stop-color="#49bad7" stop-opacity="0.92" />
+              </linearGradient>
+
+              <radialGradient id="focusGradient">
+                <stop offset="0%" stop-color="#ef476f" stop-opacity="0.7" />
+                <stop offset="100%" stop-color="#ef476f" stop-opacity="0" />
+              </radialGradient>
+
+              <!-- Light inside the eye is clipped to the circular eyeball. -->
+              <clipPath id="eyeballClip">
+                <circle cx="680" cy="250" r="220" />
+              </clipPath>
+
+              <marker
+                id="arrowhead"
+                markerWidth="9"
+                markerHeight="7"
+                refX="8"
+                refY="3.5"
+                orient="auto"
+              >
+                <polygon points="0 0, 9 3.5, 0 7" fill="#f0b323" />
+              </marker>
+            </defs>
+
+            <!-- Simplified distant object -->
+            <g id="farObject">
+              <circle cx="78" cy="105" r="25" fill="#ffd166" />
+
               <path
-                d="M0,0 L0,6 L8,3 z"
-                fill="#f4b400"
+                d="M25 355 L115 235 L180 330 L235 270 L325 390 L25 390 Z"
+                fill="#8ed3bf"
               />
-            </marker>
 
-            <filter id="softShadow">
-              <feDropShadow
-                dx="0"
-                dy="4"
-                stdDeviation="4"
-                flood-opacity="0.18"
+              <path
+                d="M115 235 L93 266 L115 258 L133 274 L147 272 Z"
+                fill="white"
               />
-            </filter>
-          </defs>
 
-          <!-- Object -->
-          <g id="objectGroup" filter="url(#softShadow)">
-            <line
-              id="objectGround"
-              class="object-ground"
-              x1="55"
-              y1="395"
-              x2="145"
-              y2="395"
+              <text x="30" y="425" class="diagram-label">
+                Distant object
+              </text>
+
+              <text x="30" y="448" class="small-label">
+                Rays arrive almost parallel
+              </text>
+            </g>
+
+            <!-- Simplified near object -->
+            <g id="nearObject" style="display: none">
+              <rect
+                x="90"
+                y="170"
+                width="125"
+                height="170"
+                rx="10"
+                fill="#ef476f"
+              />
+
+              <rect
+                x="103"
+                y="184"
+                width="99"
+                height="142"
+                rx="5"
+                fill="#fff7e8"
+              />
+
+              <line
+                x1="122"
+                y1="245"
+                x2="184"
+                y2="245"
+                stroke="#95a7b7"
+                stroke-width="5"
+                stroke-linecap="round"
+              />
+
+              <line
+                x1="122"
+                y1="270"
+                x2="174"
+                y2="270"
+                stroke="#95a7b7"
+                stroke-width="5"
+                stroke-linecap="round"
+              />
+
+              <text x="45" y="410" class="diagram-label">
+                Near object
+              </text>
+
+              <text x="45" y="433" class="small-label">
+                Rays spread out
+              </text>
+            </g>
+
+            <text id="rayTypeLabel" x="260" y="125" class="diagram-label">
+              Parallel light rays
+            </text>
+
+            <!-- Simple circular eyeball -->
+            <circle
+              cx="680"
+              cy="250"
+              r="220"
+              fill="url(#eyeballFill)"
+              stroke="#5da5c9"
+              stroke-width="7"
+            />
+
+            <!-- Retina -->
+            <path
+              d="M840 135 Q900 250 840 365"
+              fill="none"
+              stroke="#ef476f"
+              stroke-width="14"
+              stroke-linecap="round"
+            />
+
+            <!-- Rays outside the eyeball -->
+            <g id="outsideRays">
+              <path
+                id="outerTop"
+                class="ray"
+                marker-end="url(#arrowhead)"
+              />
+
+              <path
+                id="outerMiddle"
+                class="ray"
+                marker-end="url(#arrowhead)"
+              />
+
+              <path
+                id="outerBottom"
+                class="ray"
+                marker-end="url(#arrowhead)"
+              />
+            </g>
+
+            <!-- Rays inside the eyeball -->
+            <g id="raysGroup" clip-path="url(#eyeballClip)">
+              <path
+                id="incomingTop"
+                class="ray"
+                marker-end="url(#arrowhead)"
+              />
+
+              <path
+                id="incomingMiddle"
+                class="ray"
+                marker-end="url(#arrowhead)"
+              />
+
+              <path
+                id="incomingBottom"
+                class="ray"
+                marker-end="url(#arrowhead)"
+              />
+
+              <path id="outgoingTop" class="ray" />
+              <path id="outgoingMiddle" class="ray" />
+              <path id="outgoingBottom" class="ray" />
+            </g>
+
+            <!-- Adjustable lens -->
+            <path
+              id="lensShape"
+              d=""
+              fill="url(#lensFill)"
+              stroke="#188aaa"
+              stroke-width="4"
             />
 
             <path
-              id="objectArrow"
-              class="object-arrow"
+              id="lensHighlight"
               d=""
+              fill="none"
+              stroke="white"
+              stroke-width="5"
+              stroke-linecap="round"
+              opacity="0.75"
+            />
+
+            <!-- Dashed continuation shows where rays would meet -->
+            <g id="extensionGroup">
+              <path id="extensionTop" class="ray-extension" />
+              <path id="extensionMiddle" class="ray-extension" />
+              <path id="extensionBottom" class="ray-extension" />
+            </g>
+
+            <!-- Focus point -->
+            <circle
+              id="focusGlow"
+              cx="870"
+              cy="250"
+              r="30"
+              fill="url(#focusGradient)"
+            />
+
+            <circle
+              id="focusPoint"
+              cx="870"
+              cy="250"
+              r="9"
+              fill="#ef476f"
+              stroke="white"
+              stroke-width="4"
+            />
+
+            <!-- Essential labels only -->
+            <text x="535" y="115" class="diagram-label">Lens</text>
+
+            <line
+              x1="565"
+              y1="123"
+              x2="565"
+              y2="165"
+              stroke="#48667d"
+              stroke-width="2"
+            />
+
+            <text x="817" y="95" class="diagram-label">Retina</text>
+
+            <line
+              x1="844"
+              y1="103"
+              x2="850"
+              y2="135"
+              stroke="#48667d"
+              stroke-width="2"
             />
 
             <text
-              id="objectLabel"
-              class="label"
-              x="100"
-              y="430"
+              id="focusLabel"
+              x="870"
+              y="220"
               text-anchor="middle"
+              class="focus-label"
             >
-              Object
+              Focus point
             </text>
-          </g>
+          </svg>
+        </div>
 
-          <!-- Optic nerve behind the eye -->
-          <path
-            class="optic-nerve"
-            d="M887 284 C927 286, 951 301, 985 330"
-          />
-
-          <!-- Eyeball -->
-          <path
-            class="eye-outline"
-            d="
-              M305 105
-              C390 55, 570 42, 735 90
-              C850 123, 918 185, 925 260
-              C918 335, 850 397, 735 430
-              C570 478, 390 465, 305 415
-              C270 365, 252 316, 250 260
-              C252 204, 270 155, 305 105
-              Z
-            "
-          />
-
-          <!-- Cornea -->
-          <path
-            class="cornea"
-            d="
-              M306 105
-              C244 132, 218 194, 220 260
-              C218 326, 244 388, 306 415
-              C272 365, 255 316, 253 260
-              C255 204, 272 155, 306 105
-              Z
-            "
-          />
-
-          <!-- Iris -->
-          <path
-            class="iris"
-            d="M335 158 C320 195, 318 218, 320 236"
-          />
-
-          <path
-            class="iris"
-            d="M335 362 C320 325, 318 302, 320 284"
-          />
-
-          <!-- Pupil indicator -->
-          <ellipse
-            class="pupil"
-            cx="321"
-            cy="260"
-            rx="7"
-            ry="24"
-          />
-
-          <!-- Retina -->
-          <path
-            class="retina"
-            d="M815 128 C884 166, 907 214, 909 260"
-          />
-
-          <path
-            class="retina"
-            d="M909 260 C907 306, 884 354, 815 392"
-          />
-
-          <!-- Light rays: placed behind the lens -->
-          <g id="rayGroup">
-            <path
-              id="upperRay"
-              class="light-ray"
-              marker-end="url(#rayArrow)"
-              d=""
-            />
-
-            <path
-              id="middleRay"
-              class="light-ray central-ray"
-              marker-end="url(#rayArrow)"
-              d=""
-            />
-
-            <path
-              id="lowerRay"
-              class="light-ray"
-              marker-end="url(#rayArrow)"
-              d=""
-            />
-          </g>
-
-          <!-- Ciliary muscles -->
-          <g id="muscleGroup">
-            <path
-              id="upperLeftMuscle"
-              class="muscle"
-              d=""
-            />
-
-            <path
-              id="upperRightMuscle"
-              class="muscle"
-              d=""
-            />
-
-            <path
-              id="lowerLeftMuscle"
-              class="muscle"
-              d=""
-            />
-
-            <path
-              id="lowerRightMuscle"
-              class="muscle"
-              d=""
-            />
-          </g>
-
-          <!-- Suspensory ligaments -->
-          <g id="ligamentGroup">
-            <path
-              id="upperLeftLigament"
-              class="ligament"
-              d=""
-            />
-
-            <path
-              id="upperRightLigament"
-              class="ligament"
-              d=""
-            />
-
-            <path
-              id="lowerLeftLigament"
-              class="ligament"
-              d=""
-            />
-
-            <path
-              id="lowerRightLigament"
-              class="ligament"
-              d=""
-            />
-          </g>
-
-          <!-- Lens -->
-          <path
-            id="lens"
-            class="lens"
-            d=""
-          />
-
-          <!-- Focus point -->
-          <circle
-            id="focusDot"
-            class="focus-dot"
-            cx="897"
-            cy="260"
-            r="8"
-          />
-
-          <!-- Diagram labels -->
-          <text
-            class="small-label"
-            x="500"
-            y="49"
-            text-anchor="middle"
-          >
-            Ciliary muscle
-          </text>
-
-          <line
-            x1="500"
-            y1="58"
-            x2="500"
-            y2="103"
-            stroke="#5d7184"
-            stroke-width="2"
-          />
-
-          <text
-            class="small-label"
-            x="500"
-            y="492"
-            text-anchor="middle"
-          >
-            Suspensory ligaments
-          </text>
-
-          <line
-            x1="500"
-            y1="475"
-            x2="500"
-            y2="420"
-            stroke="#5d7184"
-            stroke-width="2"
-          />
-
-          <text
-            class="label"
-            x="500"
-            y="267"
-            text-anchor="middle"
-          >
-            Lens
-          </text>
-
-          <text
-            class="small-label"
-            x="871"
-            y="103"
-            text-anchor="middle"
-          >
-            Retina
-          </text>
-
-          <line
-            x1="871"
-            y1="111"
-            x2="850"
-            y2="143"
-            stroke="#5d7184"
-            stroke-width="2"
-          />
-
-          <text
-            class="small-label"
-            x="246"
-            y="82"
-            text-anchor="middle"
-          >
-            Cornea
-          </text>
-
-          <line
-            x1="246"
-            y1="90"
-            x2="251"
-            y2="139"
-            stroke="#5d7184"
-            stroke-width="2"
-          />
-        </svg>
-      </div>
-
-      <div class="control-panel">
-        <div>
-          <div class="slider-area">
-            <div class="slider-heading">
-              <h3>Move the object</h3>
-
-              <span
-                class="slider-value"
-                id="sliderValue"
-              >
-                50% near
-              </span>
+        <div class="slider-section">
+          <div class="slider-heading">
+            <div>
+              <span class="control-label">Adjust the eye</span>
+              <h2>Change the lens thickness</h2>
             </div>
 
-            <label
-              for="distanceSlider"
-              class="sr-only"
-            >
-              Change the viewing distance
-            </label>
+            <span id="thicknessBadge" class="value-badge">
+              Thin lens
+            </span>
+          </div>
+
+          <div class="slider-container">
+            <span class="slider-end">Thinner</span>
 
             <input
-              id="distanceSlider"
+              id="lensSlider"
               type="range"
               min="0"
               max="100"
-              value="50"
-              step="1"
-              aria-valuetext="Intermediate viewing distance"
+              value="30"
+              aria-label="Lens thickness"
             />
 
-            <div class="range-labels">
-              <span>Far away</span>
-              <span>Very near</span>
-            </div>
+            <span class="slider-end">Thicker</span>
+          </div>
+        </div>
+      </article>
 
-            <div class="preset-buttons">
-              <button
-                type="button"
-                class="preset-button"
-                data-value="0"
-              >
-                Distant object
-              </button>
+      <aside class="side-panel">
+        <section id="statusCard" class="card status-card" aria-live="polite">
+          <div id="statusIcon" class="status-icon">🎯</div>
 
-              <button
-                type="button"
-                class="preset-button active"
-                data-value="50"
-              >
-                Intermediate
-              </button>
+          <h2 id="statusTitle">Focused on the retina!</h2>
 
-              <button
-                type="button"
-                class="preset-button"
-                data-value="100"
-              >
-                Near object
-              </button>
-            </div>
+          <p id="statusText">
+            The image would appear clear because the light meets on the retina.
+          </p>
+
+          <div class="retina-meter">
+            <span id="meterMarker"></span>
           </div>
 
-          <div
-            class="status-grid"
-            style="margin-top: 16px"
+          <div class="meter-labels">
+            <span>In front</span>
+            <span>On retina</span>
+            <span>Behind</span>
+          </div>
+
+          <button id="autoFocusButton" class="action-button" type="button">
+            Show the correct lens
+          </button>
+        </section>
+
+        <section class="card lesson-card">
+          <h2>💡 What is happening?</h2>
+
+          <p id="conceptText"></p>
+
+          <div class="key-idea">
+            <strong>Key idea:</strong>
+
+            <span id="keyIdeaText">
+              Far objects need a thinner, flatter lens.
+            </span>
+          </div>
+        </section>
+
+        <section class="card challenge-card">
+          <h2>🧪 Focus challenge</h2>
+
+          <p id="challengeText">
+            Move the slider away from the correct position. Then try to focus
+            the distant object on the retina again.
+          </p>
+
+          <button
+            id="challengeButton"
+            class="action-button secondary"
+            type="button"
           >
-            <div class="status-item">
-              <span class="status-name">Ciliary muscle</span>
-              <span
-                class="status-value"
-                id="muscleStatus"
-              >
-                Partly contracted
-              </span>
-            </div>
-
-            <div class="status-item">
-              <span class="status-name">
-                Suspensory ligaments
-              </span>
-              <span
-                class="status-value"
-                id="ligamentStatus"
-              >
-                Moderate tension
-              </span>
-            </div>
-
-            <div class="status-item">
-              <span class="status-name">Lens shape</span>
-              <span
-                class="status-value"
-                id="lensStatus"
-              >
-                Moderately rounded
-              </span>
-            </div>
-
-            <div class="status-item">
-              <span class="status-name">Light bending</span>
-              <span
-                class="status-value"
-                id="lightStatus"
-              >
-                Moderate
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <aside class="explanation">
-          <h3 id="explanationTitle">
-            Intermediate focus
-          </h3>
-
-          <p id="explanationText">
-            The ciliary muscles are partly contracted. The
-            ligaments have moderate tension, so the lens has an
-            intermediate shape.
-          </p>
-
-          <p class="important-note">
-            <strong>Remember:</strong> ciliary muscle contraction
-            does not pull the lens flatter. It reduces tension in
-            the ligaments, allowing the elastic lens to become
-            rounder.
-          </p>
-        </aside>
-      </div>
+            Start a challenge
+          </button>
+        </section>
+      </aside>
     </section>
 
-    <section class="story-section">
-      <h2 id="storyHeading">
-        The focusing sequence
-      </h2>
+    <section class="summary-grid">
+      <article class="card summary-card near-summary">
+        <div class="summary-icon">📖</div>
 
-      <div class="story-flow">
-        <div class="story-step active">
-          <span class="step-number">1</span>
-          <strong id="storyMuscle">
-            Muscle partly contracts
-          </strong>
-          <span>The ciliary muscle starts the change.</span>
+        <div>
+          <h3>Near object → thicker lens</h3>
+
+          <p>
+            Light from a near object is diverging. A thicker, rounder lens
+            bends it more strongly so it focuses on the retina.
+          </p>
         </div>
+      </article>
 
-        <div class="story-arrow" aria-hidden="true">→</div>
+      <article class="card summary-card far-summary">
+        <div class="summary-icon">🏔️</div>
 
-        <div class="story-step active">
-          <span class="step-number">2</span>
-          <strong id="storyLigament">
-            Ligament tension decreases
-          </strong>
-          <span>
-            The suspensory ligaments respond to the muscle.
-          </span>
+        <div>
+          <h3>Distant object → thinner lens</h3>
+
+          <p>
+            Light from a distant object is almost parallel. A thinner, flatter
+            lens provides enough bending to focus it on the retina.
+          </p>
         </div>
-
-        <div class="story-arrow" aria-hidden="true">→</div>
-
-        <div class="story-step active">
-          <span class="step-number">3</span>
-          <strong id="storyLens">
-            Lens becomes rounder
-          </strong>
-          <span>
-            The elastic lens changes its curvature.
-          </span>
-        </div>
-
-        <div class="story-arrow" aria-hidden="true">→</div>
-
-        <div class="story-step active">
-          <span class="step-number">4</span>
-          <strong id="storyLight">
-            Light bends more
-          </strong>
-          <span>
-            The image remains focused on the retina.
-          </span>
-        </div>
-      </div>
-
-      <div class="legend">
-        <div class="legend-item">
-          <span
-            class="legend-color"
-            style="background: var(--muscle)"
-          ></span>
-          Ciliary muscle
-        </div>
-
-        <div class="legend-item">
-          <span
-            class="legend-color"
-            style="background: var(--ligament)"
-          ></span>
-          Suspensory ligaments
-        </div>
-
-        <div class="legend-item">
-          <span
-            class="legend-color"
-            style="background: var(--lens)"
-          ></span>
-          Lens
-        </div>
-
-        <div class="legend-item">
-          <span
-            class="legend-color"
-            style="background: var(--ray)"
-          ></span>
-          Light rays
-        </div>
-
-        <div class="legend-item">
-          <span
-            class="legend-color"
-            style="background: var(--retina)"
-          ></span>
-          Retina
-        </div>
-      </div>
+      </article>
     </section>
-
-    <p class="footer-note">
-      This is a simplified teaching model. It exaggerates some
-      movements so that the relationship between the ciliary
-      muscle, suspensory ligaments, and lens is easy to see.
-    </p>
   </main>
 
-  <style>
-    /* Visually hidden but available to screen readers */
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-  </style>
-
   <script>
-    "use strict";
+    const nearButton = document.getElementById("nearButton");
+    const farButton = document.getElementById("farButton");
+    const rayToggle = document.getElementById("rayToggle");
+    const lensSlider = document.getElementById("lensSlider");
 
-    const slider = document.getElementById("distanceSlider");
-    const sliderValue = document.getElementById("sliderValue");
-    const modeBadge = document.getElementById("modeBadge");
+    const nearObject = document.getElementById("nearObject");
+    const farObject = document.getElementById("farObject");
 
-    const lens = document.getElementById("lens");
-    const focusDot = document.getElementById("focusDot");
+    const lensShape = document.getElementById("lensShape");
+    const lensHighlight = document.getElementById("lensHighlight");
 
-    const upperLeftMuscle =
-      document.getElementById("upperLeftMuscle");
-    const upperRightMuscle =
-      document.getElementById("upperRightMuscle");
-    const lowerLeftMuscle =
-      document.getElementById("lowerLeftMuscle");
-    const lowerRightMuscle =
-      document.getElementById("lowerRightMuscle");
+    const raysGroup = document.getElementById("raysGroup");
+    const outsideRays = document.getElementById("outsideRays");
+    const extensionGroup = document.getElementById("extensionGroup");
 
-    const upperLeftLigament =
-      document.getElementById("upperLeftLigament");
-    const upperRightLigament =
-      document.getElementById("upperRightLigament");
-    const lowerLeftLigament =
-      document.getElementById("lowerLeftLigament");
-    const lowerRightLigament =
-      document.getElementById("lowerRightLigament");
+    const outerTop = document.getElementById("outerTop");
+    const outerMiddle = document.getElementById("outerMiddle");
+    const outerBottom = document.getElementById("outerBottom");
 
-    const upperRay = document.getElementById("upperRay");
-    const middleRay = document.getElementById("middleRay");
-    const lowerRay = document.getElementById("lowerRay");
+    const incomingTop = document.getElementById("incomingTop");
+    const incomingMiddle = document.getElementById("incomingMiddle");
+    const incomingBottom = document.getElementById("incomingBottom");
 
-    const objectArrow = document.getElementById("objectArrow");
-    const objectGround = document.getElementById("objectGround");
-    const objectLabel = document.getElementById("objectLabel");
+    const outgoingTop = document.getElementById("outgoingTop");
+    const outgoingMiddle = document.getElementById("outgoingMiddle");
+    const outgoingBottom = document.getElementById("outgoingBottom");
 
-    const muscleStatus =
-      document.getElementById("muscleStatus");
-    const ligamentStatus =
-      document.getElementById("ligamentStatus");
-    const lensStatus =
-      document.getElementById("lensStatus");
-    const lightStatus =
-      document.getElementById("lightStatus");
+    const extensionTop = document.getElementById("extensionTop");
+    const extensionMiddle = document.getElementById("extensionMiddle");
+    const extensionBottom = document.getElementById("extensionBottom");
 
-    const explanationTitle =
-      document.getElementById("explanationTitle");
-    const explanationText =
-      document.getElementById("explanationText");
+    const focusPoint = document.getElementById("focusPoint");
+    const focusGlow = document.getElementById("focusGlow");
+    const focusLabel = document.getElementById("focusLabel");
 
-    const storyMuscle =
-      document.getElementById("storyMuscle");
-    const storyLigament =
-      document.getElementById("storyLigament");
-    const storyLens =
-      document.getElementById("storyLens");
-    const storyLight =
-      document.getElementById("storyLight");
+    const rayTypeLabel = document.getElementById("rayTypeLabel");
+    const thicknessBadge = document.getElementById("thicknessBadge");
 
-    const presetButtons =
-      document.querySelectorAll(".preset-button");
+    const statusCard = document.getElementById("statusCard");
+    const statusIcon = document.getElementById("statusIcon");
+    const statusTitle = document.getElementById("statusTitle");
+    const statusText = document.getElementById("statusText");
+    const meterMarker = document.getElementById("meterMarker");
 
-    const centerX = 500;
-    const centerY = 260;
-    const retinaX = 897;
+    const conceptText = document.getElementById("conceptText");
+    const keyIdeaText = document.getElementById("keyIdeaText");
+    const challengeText = document.getElementById("challengeText");
 
-    /**
-     * Returns a number between start and end.
-     */
-    function lerp(start, end, amount) {
-      return start + (end - start) * amount;
-    }
+    const autoFocusButton = document.getElementById("autoFocusButton");
+    const challengeButton = document.getElementById("challengeButton");
 
-    /**
-     * Rounds a number for cleaner SVG path values.
-     */
-    function round(value) {
-      return Math.round(value * 10) / 10;
-    }
+    /*
+      Important horizontal positions in the simplified diagram.
+    */
+    const eyeballLeftX = 460;
+    const lensX = 565;
+    const retinaX = 870;
 
-    /**
-     * Creates the outline of the lens.
-     *
-     * A wider horizontal radius represents a thicker,
-     * more rounded lens.
-     */
-    function createLensPath(radiusX, radiusY) {
-      const cx = centerX;
-      const cy = centerY;
+    /*
+      These are simplified teaching values rather than measurements
+      of a real human eye.
+    */
+    const settings = {
+      far: {
+        idealThickness: 30,
+        objectName: "distant object",
+        rayType: "Parallel light rays"
+      },
 
-      const topY = cy - radiusY;
-      const bottomY = cy + radiusY;
+      near: {
+        idealThickness: 75,
+        objectName: "near object",
+        rayType: "Diverging light rays"
+      }
+    };
 
-      return `
-        M ${cx} ${round(topY)}
-        C ${round(cx - radiusX)} ${round(cy - radiusY * 0.62)},
-          ${round(cx - radiusX)} ${round(cy + radiusY * 0.62)},
-          ${cx} ${round(bottomY)}
-        C ${round(cx + radiusX)} ${round(cy + radiusY * 0.62)},
-          ${round(cx + radiusX)} ${round(cy - radiusY * 0.62)},
-          ${cx} ${round(topY)}
-        Z
-      `;
-    }
+    let mode = "far";
 
-    /**
-     * Creates one of the four pink ciliary-muscle sections.
-     */
-    function createMusclePath(x1, y1, x2, y2, thickness) {
-      const curve = thickness * 0.55;
+    function setMode(newMode) {
+      mode = newMode;
 
-      return `
-        M ${round(x1)} ${round(y1)}
-        Q ${round((x1 + x2) / 2)}
-          ${round(y1 - curve)}
-          ${round(x2)} ${round(y2)}
-        Q ${round((x1 + x2) / 2)}
-          ${round(y2 + thickness)}
-          ${round(x1)} ${round(y1)}
-        Z
-      `;
-    }
+      const isNear = mode === "near";
 
-    /**
-     * Creates a ligament.
-     *
-     * When slack is high, the path curves visibly.
-     * When slack is low, the path is almost straight.
-     */
-    function createLigamentPath(
-      startX,
-      startY,
-      endX,
-      endY,
-      slack,
-      direction
-    ) {
-      const midX = (startX + endX) / 2;
-      const midY =
-        (startY + endY) / 2 +
-        slack * 18 * direction;
+      nearButton.classList.toggle("active", isNear);
+      farButton.classList.toggle("active", !isNear);
 
-      return `
-        M ${round(startX)} ${round(startY)}
-        Q ${round(midX)} ${round(midY)}
-          ${round(endX)} ${round(endY)}
-      `;
-    }
+      nearButton.setAttribute("aria-pressed", String(isNear));
+      farButton.setAttribute("aria-pressed", String(!isNear));
 
-    /**
-     * Draws the object arrow.
-     */
-    function createObjectArrow(x, baseY, height) {
-      const topY = baseY - height;
-      const shaftWidth = 15;
-      const headWidth = 34;
-      const headHeight = 40;
+      nearObject.style.display = isNear ? "block" : "none";
+      farObject.style.display = isNear ? "none" : "block";
 
-      return `
-        M ${round(x - shaftWidth / 2)} ${baseY}
-        L ${round(x - shaftWidth / 2)}
-          ${round(topY + headHeight)}
-        L ${round(x - headWidth)} ${round(topY + headHeight)}
-        L ${x} ${topY}
-        L ${round(x + headWidth)} ${round(topY + headHeight)}
-        L ${round(x + shaftWidth / 2)}
-          ${round(topY + headHeight)}
-        L ${round(x + shaftWidth / 2)} ${baseY}
-        Z
-      `;
-    }
+      rayTypeLabel.textContent = settings[mode].rayType;
 
-    /**
-     * Updates all labels and explanatory text.
-     */
-    function updateText(value) {
-      let mode;
+      if (isNear) {
+        conceptText.textContent =
+          "Light from a near object reaches the eye as diverging rays. " +
+          "The lens must become thicker and rounder to bend the rays more strongly.";
 
-      if (value <= 25) {
-        mode = "distant";
-      } else if (value >= 75) {
-        mode = "near";
+        keyIdeaText.textContent =
+          "Near objects need a thicker lens because their light rays are diverging.";
+
+        challengeText.textContent =
+          "Can you make the lens thick enough to focus the near object exactly on the retina?";
       } else {
-        mode = "intermediate";
+        conceptText.textContent =
+          "Light from a distant object reaches the eye as almost parallel rays. " +
+          "The lens becomes thinner and flatter because less bending is needed.";
+
+        keyIdeaText.textContent =
+          "Far objects need a thinner lens because their light rays are almost parallel.";
+
+        challengeText.textContent =
+          "Can you make the lens thin enough to focus the distant object exactly on the retina?";
       }
 
-      sliderValue.textContent = `${value}% near`;
-
-      if (mode === "distant") {
-        modeBadge.textContent = "Focusing on a distant object";
-        modeBadge.style.backgroundColor = "#075985";
-
-        muscleStatus.textContent = "Relaxed";
-        ligamentStatus.textContent = "Tight";
-        lensStatus.textContent = "Thin and flatter";
-        lightStatus.textContent = "Less refraction";
-
-        explanationTitle.textContent = "Distant vision";
-
-        explanationText.textContent =
-          "For a distant object, the ciliary muscles relax. " +
-          "This increases tension in the suspensory ligaments. " +
-          "The ligaments pull the lens into a thinner, flatter " +
-          "shape, so the lens bends light less.";
-
-        storyMuscle.textContent = "Ciliary muscle relaxes";
-        storyLigament.textContent = "Ligaments become tight";
-        storyLens.textContent = "Lens becomes thinner";
-        storyLight.textContent = "Light bends less";
-
-        slider.setAttribute(
-          "aria-valuetext",
-          "Focusing on a distant object"
-        );
-      } else if (mode === "near") {
-        modeBadge.textContent = "Focusing on a near object";
-        modeBadge.style.backgroundColor = "#b42345";
-
-        muscleStatus.textContent = "Contracted";
-        ligamentStatus.textContent = "Loose";
-        lensStatus.textContent = "Thick and rounded";
-        lightStatus.textContent = "More refraction";
-
-        explanationTitle.textContent = "Near vision";
-
-        explanationText.textContent =
-          "For a near object, the ciliary muscles contract. " +
-          "This reduces tension in the suspensory ligaments. " +
-          "The elastic lens becomes thicker and rounder, so it " +
-          "bends the strongly diverging light rays more.";
-
-        storyMuscle.textContent = "Ciliary muscle contracts";
-        storyLigament.textContent = "Ligaments become loose";
-        storyLens.textContent = "Lens becomes rounder";
-        storyLight.textContent = "Light bends more";
-
-        slider.setAttribute(
-          "aria-valuetext",
-          "Focusing on a near object"
-        );
-      } else {
-        modeBadge.textContent = "Intermediate focus";
-        modeBadge.style.backgroundColor = "#6d4ba0";
-
-        muscleStatus.textContent = "Partly contracted";
-        ligamentStatus.textContent = "Moderate tension";
-        lensStatus.textContent = "Moderately rounded";
-        lightStatus.textContent = "Moderate refraction";
-
-        explanationTitle.textContent = "Intermediate focus";
-
-        explanationText.textContent =
-          "The ciliary muscles are partly contracted. The " +
-          "suspensory ligaments have moderate tension, so the " +
-          "lens has an intermediate curvature and bends light " +
-          "by a moderate amount.";
-
-        storyMuscle.textContent =
-          "Muscle partly contracts";
-        storyLigament.textContent =
-          "Ligament tension decreases";
-        storyLens.textContent = "Lens becomes rounder";
-        storyLight.textContent = "Light bends more";
-
-        slider.setAttribute(
-          "aria-valuetext",
-          "Intermediate viewing distance"
-        );
-      }
+      updateSimulation();
     }
 
-    /**
-     * Updates the active preset button.
-     */
-    function updateButtons(value) {
-      presetButtons.forEach((button) => {
-        const buttonValue = Number(button.dataset.value);
-        const isActive = Math.abs(buttonValue - value) < 3;
-
-        button.classList.toggle("active", isActive);
-      });
-    }
-
-    /**
-     * Updates the slider's colored track.
-     */
-    function updateSliderBackground(value) {
-      slider.style.background = `
-        linear-gradient(
-          to right,
-          #1887c9 0%,
-          #1887c9 ${value}%,
-          #cbd9e3 ${value}%,
-          #cbd9e3 100%
-        )
-      `;
-    }
-
-    /**
-     * Main function that redraws the simulation.
-     */
     function updateSimulation() {
-      const value = Number(slider.value);
-
-      // 0 = distant vision, 1 = near vision
-      const nearAmount = value / 100;
+      const thickness = Number(lensSlider.value);
+      const ideal = settings[mode].idealThickness;
 
       /*
-       * LENS
-       *
-       * Near vision produces a thicker and more rounded lens.
-       */
-      const lensRadiusX = lerp(27, 55, nearAmount);
-      const lensRadiusY = lerp(82, 98, nearAmount);
-
-      lens.setAttribute(
-        "d",
-        createLensPath(lensRadiusX, lensRadiusY)
+        A lens that is too thin focuses behind the retina.
+        A lens that is too thick focuses in front of the retina.
+      */
+      const focusX = clamp(
+        retinaX + (ideal - thickness) * 3.1,
+        680,
+        935
       );
 
-      /*
-       * CILIARY MUSCLES
-       *
-       * They move inward and become visually thicker as
-       * contraction increases.
-       */
-      const inwardMovement = lerp(0, 19, nearAmount);
-      const muscleThickness = lerp(15, 28, nearAmount);
-
-      const leftInnerX = 450 + inwardMovement;
-      const rightInnerX = 550 - inwardMovement;
-
-      const upperY = lerp(128, 147, nearAmount);
-      const lowerY = lerp(392, 373, nearAmount);
-
-      upperLeftMuscle.setAttribute(
-        "d",
-        createMusclePath(
-          370,
-          126,
-          leftInnerX,
-          upperY,
-          muscleThickness
-        )
-      );
-
-      upperRightMuscle.setAttribute(
-        "d",
-        createMusclePath(
-          630,
-          126,
-          rightInnerX,
-          upperY,
-          muscleThickness
-        )
-      );
-
-      lowerLeftMuscle.setAttribute(
-        "d",
-        createMusclePath(
-          370,
-          394,
-          leftInnerX,
-          lowerY,
-          -muscleThickness
-        )
-      );
-
-      lowerRightMuscle.setAttribute(
-        "d",
-        createMusclePath(
-          630,
-          394,
-          rightInnerX,
-          lowerY,
-          -muscleThickness
-        )
-      );
-
-      /*
-       * SUSPENSORY LIGAMENTS
-       *
-       * More contraction means more slack.
-       */
-      const slack = nearAmount;
-
-      const upperLensY =
-        centerY - lensRadiusY * 0.53;
-      const lowerLensY =
-        centerY + lensRadiusY * 0.53;
-
-      const leftLensX =
-        centerX - lensRadiusX * 0.76;
-      const rightLensX =
-        centerX + lensRadiusX * 0.76;
-
-      upperLeftLigament.setAttribute(
-        "d",
-        createLigamentPath(
-          leftInnerX - 3,
-          upperY + 10,
-          leftLensX,
-          upperLensY,
-          slack,
-          1
-        )
-      );
-
-      upperRightLigament.setAttribute(
-        "d",
-        createLigamentPath(
-          rightInnerX + 3,
-          upperY + 10,
-          rightLensX,
-          upperLensY,
-          slack,
-          1
-        )
-      );
-
-      lowerLeftLigament.setAttribute(
-        "d",
-        createLigamentPath(
-          leftInnerX - 3,
-          lowerY - 10,
-          leftLensX,
-          lowerLensY,
-          slack,
-          -1
-        )
-      );
-
-      lowerRightLigament.setAttribute(
-        "d",
-        createLigamentPath(
-          rightInnerX + 3,
-          lowerY - 10,
-          rightLensX,
-          lowerLensY,
-          slack,
-          -1
-        )
-      );
-
-      /*
-       * Make loose ligaments look less rigid by changing
-       * their dash pattern slightly.
-       */
-      const dashSize = lerp(0, 7, nearAmount);
-      const gapSize = lerp(0, 4, nearAmount);
-
-      if (nearAmount > 0.65) {
-        document
-          .querySelectorAll(".ligament")
-          .forEach((item) => {
-            item.style.strokeDasharray =
-              `${dashSize} ${gapSize}`;
-          });
-      } else {
-        document
-          .querySelectorAll(".ligament")
-          .forEach((item) => {
-            item.style.strokeDasharray = "none";
-          });
-      }
-
-      /*
-       * OBJECT
-       *
-       * The object moves closer to the eye as the slider
-       * moves toward near vision.
-       */
-      const objectX = lerp(72, 188, nearAmount);
-      const objectHeight = lerp(130, 185, nearAmount);
-      const objectBaseY = 395;
-      const objectTopY = objectBaseY - objectHeight;
-
-      objectArrow.setAttribute(
-        "d",
-        createObjectArrow(
-          objectX,
-          objectBaseY,
-          objectHeight
-        )
-      );
-
-      objectGround.setAttribute("x1", objectX - 44);
-      objectGround.setAttribute("x2", objectX + 44);
-
-      objectLabel.setAttribute("x", objectX);
-
-      /*
-       * LIGHT RAYS
-       *
-       * The incoming rays spread more when the object is near.
-       * After passing through the lens, all rays meet on the
-       * retina.
-       */
-      const upperLensPointY = lerp(215, 194, nearAmount);
-      const lowerLensPointY = lerp(305, 326, nearAmount);
-
-      const lensFrontX = centerX - lensRadiusX * 0.72;
-      const lensBackX = centerX + lensRadiusX * 0.72;
-
-      const focusY = centerY;
-
-      upperRay.setAttribute(
-        "d",
-        `
-          M ${round(objectX)} ${round(objectTopY)}
-          L ${round(lensFrontX)}
-            ${round(upperLensPointY)}
-          Q ${centerX} ${round(upperLensPointY + 2)}
-            ${round(lensBackX)}
-            ${round(upperLensPointY + 7)}
-          L ${retinaX} ${focusY}
-        `
-      );
-
-      middleRay.setAttribute(
-        "d",
-        `
-          M ${round(objectX)} ${round(objectTopY)}
-          L ${centerX} ${centerY}
-          L ${retinaX} ${focusY}
-        `
-      );
-
-      lowerRay.setAttribute(
-        "d",
-        `
-          M ${round(objectX)} ${round(objectTopY)}
-          L ${round(lensFrontX)}
-            ${round(lowerLensPointY)}
-          Q ${centerX} ${round(lowerLensPointY - 2)}
-            ${round(lensBackX)}
-            ${round(lowerLensPointY - 7)}
-          L ${retinaX} ${focusY}
-        `
-      );
-
-      focusDot.setAttribute("cx", retinaX);
-      focusDot.setAttribute("cy", focusY);
-
-      updateText(value);
-      updateButtons(value);
-      updateSliderBackground(value);
+      updateLens(thickness);
+      updateRays(focusX);
+      updateFocusPoint(focusX);
+      updateStatus(thickness, ideal, focusX);
+      updateSliderAppearance(thickness);
     }
 
-    /*
-     * Slider interaction
-     */
-    slider.addEventListener("input", updateSimulation);
+    function updateLens(thickness) {
+      /*
+        Increasing the horizontal half-width makes the lens
+        look thicker and rounder.
+      */
+      const halfWidth = 12 + thickness * 0.25;
+      const topY = 170;
+      const bottomY = 330;
 
-    /*
-     * Preset button interaction
-     */
-    presetButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        slider.value = button.dataset.value;
-        updateSimulation();
-      });
-    });
+      const leftX = lensX - halfWidth;
+      const rightX = lensX + halfWidth;
 
-    /*
-     * Keyboard shortcuts:
-     * D = distant
-     * I = intermediate
-     * N = near
-     */
-    document.addEventListener("keydown", (event) => {
-      const key = event.key.toLowerCase();
+      const lensPath = `
+        M ${lensX} ${topY}
+        C ${leftX} ${topY + 30},
+          ${leftX} ${bottomY - 30},
+          ${lensX} ${bottomY}
+        C ${rightX} ${bottomY - 30},
+          ${rightX} ${topY + 30},
+          ${lensX} ${topY}
+        Z
+      `;
 
-      if (
-        document.activeElement &&
-        document.activeElement.tagName === "INPUT"
-      ) {
-        return;
+      const highlightPath = `
+        M ${lensX - halfWidth * 0.4} ${topY + 32}
+        C ${lensX - halfWidth * 0.7} 220,
+          ${lensX - halfWidth * 0.7} 265,
+          ${lensX - halfWidth * 0.45} 296
+      `;
+
+      lensShape.setAttribute("d", lensPath);
+      lensHighlight.setAttribute("d", highlightPath);
+
+      if (thickness < 42) {
+        thicknessBadge.textContent = "Thin lens";
+      } else if (thickness < 65) {
+        thicknessBadge.textContent = "Medium lens";
+      } else {
+        thicknessBadge.textContent = "Thick lens";
+      }
+    }
+
+    function updateRays(focusX) {
+      const topLensY = 210;
+      const middleLensY = 250;
+      const bottomLensY = 290;
+
+      if (mode === "far") {
+        /*
+          Light from a distant object is represented
+          by three parallel rays.
+        */
+        outerTop.setAttribute(
+          "d",
+          `M 135 ${topLensY} L ${eyeballLeftX} ${topLensY}`
+        );
+
+        outerMiddle.setAttribute(
+          "d",
+          `M 135 ${middleLensY} L ${eyeballLeftX} ${middleLensY}`
+        );
+
+        outerBottom.setAttribute(
+          "d",
+          `M 135 ${bottomLensY} L ${eyeballLeftX} ${bottomLensY}`
+        );
+
+        incomingTop.setAttribute(
+          "d",
+          `M ${eyeballLeftX} ${topLensY} L ${lensX} ${topLensY}`
+        );
+
+        incomingMiddle.setAttribute(
+          "d",
+          `M ${eyeballLeftX} ${middleLensY} L ${lensX} ${middleLensY}`
+        );
+
+        incomingBottom.setAttribute(
+          "d",
+          `M ${eyeballLeftX} ${bottomLensY} L ${lensX} ${bottomLensY}`
+        );
+      } else {
+        /*
+          Light from a near object begins at one point
+          and spreads outward.
+        */
+        const sourceX = 165;
+        const sourceY = 240;
+
+        outerTop.setAttribute(
+          "d",
+          `M ${sourceX} ${sourceY} L ${eyeballLeftX} ${topLensY}`
+        );
+
+        outerMiddle.setAttribute(
+          "d",
+          `M ${sourceX} ${sourceY} L ${eyeballLeftX} ${middleLensY}`
+        );
+
+        outerBottom.setAttribute(
+          "d",
+          `M ${sourceX} ${sourceY} L ${eyeballLeftX} ${bottomLensY}`
+        );
+
+        incomingTop.setAttribute(
+          "d",
+          `M ${eyeballLeftX} ${topLensY} L ${lensX} ${topLensY}`
+        );
+
+        incomingMiddle.setAttribute(
+          "d",
+          `M ${eyeballLeftX} ${middleLensY} L ${lensX} ${middleLensY}`
+        );
+
+        incomingBottom.setAttribute(
+          "d",
+          `M ${eyeballLeftX} ${bottomLensY} L ${lensX} ${bottomLensY}`
+        );
       }
 
-      if (key === "d") {
-        slider.value = 0;
-        updateSimulation();
+      outgoingTop.setAttribute(
+        "d",
+        makeRayPath(lensX, topLensY, focusX, 250, 930)
+      );
+
+      outgoingMiddle.setAttribute(
+        "d",
+        makeRayPath(lensX, middleLensY, focusX, 250, 930)
+      );
+
+      outgoingBottom.setAttribute(
+        "d",
+        makeRayPath(lensX, bottomLensY, focusX, 250, 930)
+      );
+
+      extensionTop.setAttribute(
+        "d",
+        makeLineAfterRetina(lensX, topLensY, focusX, 250)
+      );
+
+      extensionMiddle.setAttribute(
+        "d",
+        makeLineAfterRetina(lensX, middleLensY, focusX, 250)
+      );
+
+      extensionBottom.setAttribute(
+        "d",
+        makeLineAfterRetina(lensX, bottomLensY, focusX, 250)
+      );
+    }
+
+    function makeRayPath(x1, y1, focusX, focusY, endX) {
+      if (focusX >= endX) {
+        const endY = interpolateY(
+          x1,
+          y1,
+          focusX,
+          focusY,
+          endX
+        );
+
+        return `M ${x1} ${y1} L ${endX} ${endY}`;
       }
 
-      if (key === "i") {
-        slider.value = 50;
-        updateSimulation();
+      const endY = interpolateY(
+        x1,
+        y1,
+        focusX,
+        focusY,
+        endX
+      );
+
+      return `
+        M ${x1} ${y1}
+        L ${focusX} ${focusY}
+        L ${endX} ${endY}
+      `;
+    }
+
+    function makeLineAfterRetina(x1, y1, focusX, focusY) {
+      const startX = retinaX;
+      const endX = 930;
+
+      const startY = interpolateY(
+        x1,
+        y1,
+        focusX,
+        focusY,
+        startX
+      );
+
+      const endY = interpolateY(
+        x1,
+        y1,
+        focusX,
+        focusY,
+        endX
+      );
+
+      return `M ${startX} ${startY} L ${endX} ${endY}`;
+    }
+
+    function interpolateY(x1, y1, x2, y2, targetX) {
+      if (x2 === x1) {
+        return y2;
       }
 
-      if (key === "n") {
-        slider.value = 100;
-        updateSimulation();
-      }
-    });
+      const ratio = (targetX - x1) / (x2 - x1);
 
-    // Draw the initial state.
-    updateSimulation();
+      return y1 + ratio * (y2 - y1);
+    }
+
+    function updateFocusPoint(focusX) {
+      focusPoint.setAttribute("cx", focusX);
+      focusGlow.setAttribute("cx", focusX);
+
+      const labelX = clamp(focusX, 690, 885);
+
+      focusLabel.setAttribute("x", labelX);
+    }
+
+    function updateStatus(thickness, ideal, focusX) {
+      const difference = thickness - ideal;
+      const isFocused = Math.abs(difference) <= 3;
+
+      /*
+        Move the marker to show whether the focal point
+        is in front of, on, or behind the retina.
+      */
+      let meterPosition = 50 + (focusX - retinaX) * 0.24;
+
+      meterPosition = clamp(meterPosition, 4, 96);
+      meterMarker.style.left = `${meterPosition}%`;
+
+      if (isFocused) {
+        statusIcon.textContent = "✅";
+        statusTitle.textContent = "Focused on the retina!";
+        statusTitle.style.color = "#238a5c";
+
+        statusText.textContent =
+          "The light rays meet on the retina, so the image would appear clear.";
+
+        meterMarker.style.background = "#35b779";
+        focusPoint.setAttribute("fill", "#35b779");
+        focusGlow.style.fill = "rgba(53, 183, 121, 0.35)";
+        focusLabel.style.fill = "#238a5c";
+      } else if (difference > 0) {
+        statusIcon.textContent = "↙️";
+        statusTitle.textContent = "Focus is in front of the retina";
+        statusTitle.style.color = "#e67e22";
+
+        statusText.textContent =
+          "The lens is too thick and bends the light too strongly. " +
+          "Make the lens thinner.";
+
+        meterMarker.style.background = "#ef476f";
+        focusPoint.setAttribute("fill", "#ef476f");
+        focusGlow.style.fill = "rgba(239, 71, 111, 0.35)";
+        focusLabel.style.fill = "#ef476f";
+      } else {
+        statusIcon.textContent = "↘️";
+        statusTitle.textContent = "Focus is behind the retina";
+        statusTitle.style.color = "#e67e22";
+
+        statusText.textContent =
+          "The lens is too thin and does not bend the light enough. " +
+          "Make the lens thicker.";
+
+        meterMarker.style.background = "#ef476f";
+        focusPoint.setAttribute("fill", "#ef476f");
+        focusGlow.style.fill = "rgba(239, 71, 111, 0.35)";
+        focusLabel.style.fill = "#ef476f";
+      }
+    }
+
+    function updateSliderAppearance(thickness) {
+      lensSlider.style.setProperty(
+        "--slider-progress",
+        `${thickness}%`
+      );
+    }
+
+    function showCorrectLens() {
+      lensSlider.value = settings[mode].idealThickness;
+
+      updateSimulation();
+
+      statusCard.classList.remove("success-flash");
+
+      /*
+        Reading offsetWidth restarts the animation.
+      */
+      void statusCard.offsetWidth;
+
+      statusCard.classList.add("success-flash");
+    }
+
+    function startChallenge() {
+      const ideal = settings[mode].idealThickness;
+      let challengeValue;
+
+      if (mode === "near") {
+        challengeValue =
+          Math.random() > 0.5
+            ? randomBetween(5, 45)
+            : randomBetween(88, 100);
+      } else {
+        challengeValue =
+          Math.random() > 0.5
+            ? randomBetween(55, 100)
+            : randomBetween(0, 12);
+      }
+
+      if (Math.abs(challengeValue - ideal) < 15) {
+        challengeValue = mode === "near" ? 25 : 85;
+      }
+
+      lensSlider.value = challengeValue;
+
+      updateSimulation();
+    }
+
+    function toggleRays() {
+      const opacity = rayToggle.checked ? "1" : "0";
+
+      raysGroup.style.opacity = opacity;
+      outsideRays.style.opacity = opacity;
+      extensionGroup.style.opacity = opacity;
+    }
+
+    function randomBetween(min, max) {
+      return Math.round(min + Math.random() * (max - min));
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    nearButton.addEventListener("click", () => setMode("near"));
+    farButton.addEventListener("click", () => setMode("far"));
+
+    lensSlider.addEventListener("input", updateSimulation);
+    rayToggle.addEventListener("change", toggleRays);
+
+    autoFocusButton.addEventListener("click", showCorrectLens);
+    challengeButton.addEventListener("click", startChallenge);
+
+    setMode("far");
+    showCorrectLens();
   </script>
 </body>
 </html>
